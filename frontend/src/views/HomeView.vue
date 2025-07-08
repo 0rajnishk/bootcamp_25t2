@@ -3,7 +3,8 @@
     <button @click="hello" >click me</button>
 
     <p>{{ msg }}</p>
-
+    <!-- button to redirect to /admin -->
+    <button @click="admin">Admin</button>
 
 </template>
 
@@ -24,20 +25,24 @@ methods: {
         // alert("this is an alert")
         const response = await axios.get("http://127.0.0.1:5000/");
         this.msg = response.data
+    },
+    admin() {
+        this.$router.push('/admin')
     }
 },
 
-beforeCreate() {
-    alert("this is before create")
-},
+// beforeCreate() {
+//     alert("this is before create")
+// },
 
 created() {
     alert("this is created")
+    this.hello()
 },
 
 
 mounted() {
-    this.hello()
+    alert("this is mounted")
 },
 
 unmounted() {

@@ -3,9 +3,12 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_cors import CORS
+
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mad2.db'
 app.config["JWT_SECRET_KEY"] = "aStrongSecretKey"
@@ -25,15 +28,27 @@ class User(db.Model):
     def to_dict(self):
         return {"id":self.id, "name":self.name, "email":self.email}
 
+
+ 
+def create_admin():
+    admin = User.query.filter_by(email="admin@mail.com").first()
+    print(admin)
+    print("---------")
+    if not admin:
+        admin = User(name="admin", email="admin@mail.com", password="123456")
+        db.session.add(admin)
+        db.session.commit()
+        return "admin added successfully"
+
 with app.app_context():
     # db.drop_all()
     db.create_all()
+    create_admin()
 
 
 class HelloWorld(Resource):
     def get(self):
         return 'hello world from flask_rest'
-
 
 
 
@@ -77,8 +92,7 @@ class UserResource(Resource):
         for user in users:
             final_users.append(user.to_dict())
         return final_users
-    
-
+   
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(UserResource, '/users')

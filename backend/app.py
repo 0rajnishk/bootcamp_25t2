@@ -1,4 +1,5 @@
 from datetime import timedelta
+import json
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
@@ -7,6 +8,7 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 from functools import wraps
+import ast
 
 
 app = Flask(__name__)
@@ -27,6 +29,8 @@ def role_required(allowed_roles):
         def wrapper(*args, **kwargs):
             verify_jwt_in_request()
             current_user_identity = get_jwt_identity()
+            if isinstance(current_user_identity, str):
+                current_user_identity = ast.literal_eval(current_user_identity)
             current_user_role = current_user_identity['role']
             if current_user_role not in allowed_roles:
                 return {'message': 'Access forbidden: Insufficient role privileges'}, 403
@@ -129,13 +133,14 @@ class LoginResource(Resource):
 
         if not user.is_approved:
             return {'message': 'Account not yet approved by admin'}, 403
-
-        access_token = create_access_token(identity={'email': user.email, 'role': user.role, 'id': user.id}, expires_delta=timedelta(hours=24))
+        
+        identity = str({'email': user.email, 'role': user.role, 'id': user.id})
+        access_token = create_access_token(identity=identity, expires_delta=timedelta(hours=24))
         return {'access_token': access_token}, 200
 
 class UsersResource(Resource):
     @role_required(['admin'])
-    def get(self, user_id=None):
+    def get(self, user_id=None):    
         if user_id:
             user = User.query.get(user_id)
             if not user:
@@ -200,6 +205,8 @@ class TaskResource(Resource):
     @jwt_required()
     def get(self, task_id=None):
         current_user_identity = get_jwt_identity()
+        if isinstance(current_user_identity, str):
+            current_user_identity = ast.literal_eval(current_user_identity)
         current_user_role = current_user_identity['role']
         current_user_id = current_user_identity['id']
 
@@ -222,6 +229,8 @@ class TaskResource(Resource):
     @jwt_required()
     def put(self, task_id):
         current_user_identity = get_jwt_identity()
+        if isinstance(current_user_identity, str):
+            current_user_identity = ast.literal_eval(current_user_identity)
         current_user_role = current_user_identity['role']
         current_user_id = current_user_identity['id']
 

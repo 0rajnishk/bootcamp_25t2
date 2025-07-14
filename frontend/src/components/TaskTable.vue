@@ -20,7 +20,11 @@
           <td>{{ task.title }}</td>
           <td>{{ task.description }}</td>
           <td>
-            <input type="text" v-model="task.status" @change="$emit('update-task-status', task.id, task.status)">
+            <select :value="task.status" @change="updateTaskStatus(task.id, $event.target.value)">
+              <option value="pending">Pending</option>
+              <option value="inprogress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
           </td>
           <td>{{ task.deadline }}</td>
           <td>

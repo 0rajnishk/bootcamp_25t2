@@ -18,7 +18,11 @@
         </div>
         <div class="form-group">
           <label for="status">Status:</label>
-          <input type="text" id="status" v-model="newTask.status" required>
+          <select id="status" v-model="newTask.status" required>
+            <option value="pending">Pending</option>
+            <option value="inprogress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="deadline">Deadline:</label>
